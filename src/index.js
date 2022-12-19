@@ -28,6 +28,20 @@ app.post('/api/sign-up', async (request, response) => {
     }
 });
 
+app.post('/api/sign-in', async (request, response) => {
+    const credentials = request.body
+    const email; = credentials.email;
+    const password = credentials.password
+    const authentication = await database.raw(`select email,id from users where username='${email}' AND password='${password}'`)
+    if (authentication.length == 0) {
+        response.status(401)
+        response.json("Email and password do not match!")
+    } else {
+        response.status(200)
+        response.json(authentication[0])
+    }
+});
+
 
 
 

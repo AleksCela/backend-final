@@ -1,20 +1,35 @@
 import database from "./databaseConnectivity.js";
 
-async function credentialsValidation(email, password) {
-    const email_exists = await database.raw(`select * from users where email='${email}'`);
-    const reg_expression = /(?=.*[!?.:])(?=.*\d)/;
-    const email_validation = email.length > 5 && email.length < 20 && email_exists.length == 0;
-    const password_validation = password.length > 5 || password.length < 20 && reg_expression.test(password);
+export function containsNumber(str) {
+    return /\d/.test(str);
+}
 
-    if (!email_validation) {
-        throw new Error("The email is not valid!");
-    }
-    else if (!password_validation) {
-        throw new Error("The password is not valid!");
+export function containsSpecialChars(str) {
+    const specialChars = /[!?:.]/;
+    return specialChars.test(str);
+}
+
+
+export async function validateEmail(email) {
+    const emailCheck = await database.raw(`select email from users where email='${email}'`)
+    console.log(emailCheck);
+    if (emailCheck.length > 0) {
+        console.log("email already exist");
+        return false;
+    } else if (email.length < 5 || email.length > 20) {
+        console.log("email must be between 5 and 20 characters");
+        return false
     }
     else {
-        return true;
+        return true
     }
 }
 
-export default credentialsValidation;
+
+export function validatePassword(password) {
+    if (password.length < 5 || password.length > 20 || !containsNumber(password) || !containsSpecialChars(password)) {
+        return false
+    } else {
+        return true
+    }
+}

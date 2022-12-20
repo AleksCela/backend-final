@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import database from "../src/databaseConnectivity.js";
-import credentialsValidation from "./validationFunctions.js";
+import { validatePassword, validateEmail } from "../src/validationFunctions.js";
 
 const app = express();
 app.use(express.json());
@@ -15,26 +15,25 @@ app.use("/", express.static("./public", { extensions: ["html"] }));
 //----------------------------------------------------------
 //API routes for user authentication and account creation
 app.post("/api/sign-up", async (request, response) => {
-  const credentials = request.body;
+  const credentials = request.body
   const email = credentials.email;
-  const password = credentials.password;
+  const password = credentials.password
   console.log(email, password);
-  if (credentialsValidation(email, password)) {
-    await database.raw(
-      `insert into users (email, password) values ('${email}','${password}')`
-    );
-    const newAccount = await database.raw(
-      `SELECT * FROM users ORDER BY id DESC LIMIT 1;`
-    );
-    response.status(200);
-    response.json(newAccount);
+  if (validatePassword(password) && await validateEmail(email)) {
+    await database.raw(`insert into users (email, password) values ('${email}','${password}')`)
+    const newAccount = await database.raw(`SELECT * FROM users ORDER BY id DESC LIMIT 1;`)
+    response.status(200)
+    response.json(newAccount)
+  } else if (!validatePassword(password)) {
+    response.status(401)
+    response.json("Password is invalid")
   } else {
-    response.status(401);
-    response.json("email/password is invalid");
+    response.status(401)
+    response.json("email is invalid")
   }
 });
 
-app.post("/api/sign-in", async (request, response) => {
+app.post("/api/login", async (request, response) => {
   const credentials = request.body;
   const email = credentials.email;
   const password = credentials.password;
@@ -49,6 +48,8 @@ app.post("/api/sign-in", async (request, response) => {
     response.json(authentication[0]);
   }
 });
+
+
 
 app.get("/api/trips/:id", async (request, response) => {
   //gets the trips with selected user_id
@@ -96,13 +97,15 @@ app.put("/api/trips/:id", async (request, response) => {
   }
 });
 
-app.put("/api/user/:id", async (request, response) => {
+app.put("/api/user/updateEmail", async (request, response) => {
   //updates the credentials
+  const id = Number(request.body.id);
+  const newEmail = request.body.newEmail;
+  console.log(id, newEmail);
   try {
-    const id = Number(request.params.id);
-    const { email, password } = request.body;
+    await validateEmail(email);
     await database.raw(
-      `update users set email = '${email}', password = '${password}' where id = ${id};`
+      `update users set email = '${newEmail}' where id = ${id};`
     );
     response.status(200);
   } catch (error) {
@@ -110,6 +113,24 @@ app.put("/api/user/:id", async (request, response) => {
     console.log("Error in update");
   }
 });
+
+
+app.put("/api/user/updatePassword/:id", async (request, response) => {
+  //updates the credentials
+  try {
+    const id = Number(request.params.id);
+    const { currentPassword, password } = request.body;
+    await database.raw(
+      `update users set password = '${password}' where id = ${id} AND password=${currentPassword};`
+    );
+    response.status(200);
+  } catch (error) {
+    response.status(404);
+    console.log("Error in update");
+  }
+});
+
+
 
 app.delete("/api/trips/:id", async (request, response) => {
   const id = Number(request.params.id);

@@ -12,15 +12,13 @@ export function containsSpecialChars(str) {
 
 export async function validateEmail(email) {
     const emailCheck = await database.raw(`select email from users where email='${email}'`)
-    console.log(emailCheck);
     if (emailCheck.length > 0) {
         console.log("email already exist");
-        return false;
+        return false
     } else if (email.length < 5 || email.length > 20) {
         console.log("email must be between 5 and 20 characters");
         return false
-    }
-    else {
+    } else {
         return true
     }
 }
@@ -32,4 +30,8 @@ export function validatePassword(password) {
     } else {
         return true
     }
+}
+
+export async function validateCurrentPassword() {
+    
 }

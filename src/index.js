@@ -97,36 +97,35 @@ app.put("/api/trips/:id", async (request, response) => {
   }
 });
 
-app.put("/api/user/updateEmail", async (request, response) => {
+app.put("/api/update-email", async (request, response) => {
   //updates the credentials
   const id = Number(request.body.id);
   const newEmail = request.body.newEmail;
-  console.log(id, newEmail);
-  try {
-    await validateEmail(email);
+  if (await validateEmail(newEmail)) {
     await database.raw(
       `update users set email = '${newEmail}' where id = ${id};`
     );
     response.status(200);
-  } catch (error) {
-    response.status(404);
-    console.log("Error in update");
+    response.json("Updated")
+  } else {
+    response.status(409);
+    response.json("Error in update");
   }
 });
 
 
-app.put("/api/user/updatePassword/:id", async (request, response) => {
-  //updates the credentials
-  try {
-    const id = Number(request.params.id);
-    const { currentPassword, password } = request.body;
+app.put('/api/update-password', async (request, response) => {
+  const { currentPassword, newPassword, id } = request.body;
+  console.log(currentPassword, newPassword, id);
+  if (validatePassword(newPassword)) {
     await database.raw(
-      `update users set password = '${password}' where id = ${id} AND password=${currentPassword};`
+      `update users set password = '${newPassword}' where id = ${id} AND password='${currentPassword}';`
     );
     response.status(200);
-  } catch (error) {
-    response.status(404);
-    console.log("Error in update");
+    response.json("Updated")
+  } else {
+    response.status(409);
+    response.json("The new password is not OK!")
   }
 });
 
@@ -144,8 +143,7 @@ app.all("/*", async (request, response) => {
   response.json({ error: "This route does not exist" });
 });
 
-const hostname = "localhost";
 const port = 4000;
-app.listen(port, hostname, () => {
-  console.log(`Server listening on http://${hostname}:${port}`);
+app.listen(port, () => {
+  console.log(`Server listening on http://localhost:${port}`);
 });

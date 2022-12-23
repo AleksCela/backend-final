@@ -50,7 +50,6 @@ app.post("/api/login", async (request, response) => {
 });
 
 
-
 app.get("/api/trips/:id", async (request, response) => {
   //gets the trips with selected user_id
   const id = Number(request.params.id);
@@ -59,11 +58,12 @@ app.get("/api/trips/:id", async (request, response) => {
   );
   response.status(200);
   response.json(result);
-  console.log(result);
+
 });
 
 app.post("/api/trips", async (request, response) => {
   const trip = request.body;
+  console.log(trip);
   await database.raw(
     `insert into trips (date, destination, description, days , rating, latitude , longitude , user_id) values ('${trip.date}','${trip.destination}','${trip.description}','${trip.days}','${trip.rating}','${trip.latitude}','${trip.longitude}','${trip.user_id}')`
   );

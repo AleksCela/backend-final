@@ -90,6 +90,11 @@ app.put("/api/trips/:id", async (request, response) => {
     await database.raw(
       `update trips set date = '${date}', destination = '${destination}', description ='${description}', days ='${days}', rating ='${rating}', latitude ='${latitude}', longitude ='${longitude}' where id = ${id};`
     );
+    const updatedTrip = await database.raw(
+      `SELECT * FROM trips WHERE id = ${id};`
+    );
+    response.status(200);
+    response.json(updatedTrip);
     response.status(200);
   } catch (error) {
     response.status(404);

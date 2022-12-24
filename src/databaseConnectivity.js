@@ -3,7 +3,7 @@ import knex from 'knex';
 const database = knex({
     client: 'sqlite3',
     connection: {
-        filename: './fiddle.sqlite3',
+        filename: './database.sqlite3',
     },
     useNullAsDefault: true,
 });

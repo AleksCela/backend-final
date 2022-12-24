@@ -65,7 +65,7 @@ app.post("/api/trips", async (request, response) => {
   const trip = request.body;
   console.log(trip);
   await database.raw(
-    `insert into trips (date, destination, description, days , rating, latitude , longitude , user_id) values ('${trip.date}','${trip.destination}','${trip.description}','${trip.days}','${trip.rating}','${trip.latitude}','${trip.longitude}','${trip.user_id}')`
+    `insert into trips (date, destination, description, days , rating, latitude , longitude , country, user_id) values ('${trip.date}','${trip.destination}','${trip.description}','${trip.days}','${trip.rating}','${trip.latitude}','${trip.longitude}','${trip.country}','${trip.user_id}')`
   );
   const newTrip = await database.raw(
     `SELECT * FROM trips ORDER BY id DESC LIMIT 1;`
@@ -86,9 +86,10 @@ app.put("/api/trips/:id", async (request, response) => {
       rating,
       latitude,
       longitude,
+      country
     } = request.body;
     await database.raw(
-      `update trips set date = '${date}', destination = '${destination}', description ='${description}', days ='${days}', rating ='${rating}', latitude ='${latitude}', longitude ='${longitude}' where id = ${id};`
+      `update trips set date = '${date}', destination = '${destination}', description ='${description}', days ='${days}', rating ='${rating}', latitude ='${latitude}', longitude ='${longitude}', country = ${country} where id = ${id};`
     );
     const updatedTrip = await database.raw(
       `SELECT * FROM trips WHERE id = ${id};`

@@ -33,5 +33,5 @@ export function validatePassword(password) {
 }
 
 export async function validateCurrentPassword() {
-    
+
 }

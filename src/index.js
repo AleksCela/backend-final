@@ -127,7 +127,7 @@ app.put("/api/trips/:id", async (request, response) => {
     response.json(updatedTrip);
     response.status(200);
   } catch (error) {
-    response.status(404);
+    response.status(409);
     console.log("Error in update");
   }
 });

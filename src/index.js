@@ -17,7 +17,6 @@ app.post("/api/sign-up", async (request, response) => {
   const credentials = request.body;
   const email = credentials.email;
   const password = credentials.password;
-  console.log(email, password);
   if (validatePassword(password) && await validateEmail(email)) {
     await database.raw(`insert into users (email, password) values ('${email}','${password}')`);
     const newAccount = await database.raw(`SELECT * FROM users ORDER BY id DESC LIMIT 1;`);
@@ -48,7 +47,16 @@ app.post("/api/login", async (request, response) => {
   }
 });
 
-//API for updating the credentials
+//API for updating and deleting the credentials
+
+app.delete("/api/user/:id", async (request, response) => {
+  const id = Number(request.params.id);
+  await database.raw(`delete from trips where user_id=${id}`);
+  await database.raw(`delete from users where id=${id}`);
+  response.status(200);
+  response.json("Account deleted");
+});
+
 app.put("/api/update-email", async (request, response) => {
   const id = Number(request.body.id);
   const newEmail = request.body.newEmail;
@@ -66,7 +74,6 @@ app.put("/api/update-email", async (request, response) => {
 
 app.put("/api/update-password", async (request, response) => {
   const { currentPassword, newPassword, id } = request.body;
-  console.log(currentPassword, newPassword, id);
   if (validatePassword(newPassword)) {
     await database.raw(
       `update users set password = '${newPassword}' where id = ${id} AND password='${currentPassword}';`
@@ -79,7 +86,7 @@ app.put("/api/update-password", async (request, response) => {
   }
 });
 
- //API for users trips 
+//API for users trips 
 app.get("/api/trips/:id", async (request, response) => {
   const id = Number(request.params.id);
   const result = await database.raw(
@@ -92,7 +99,6 @@ app.get("/api/trips/:id", async (request, response) => {
 
 app.post("/api/trips", async (request, response) => {
   const trip = request.body;
-  console.log(trip);
   await database.raw(
     `insert into trips (date, destination, description, days , rating, latitude , longitude , country, user_id) values ('${trip.date}','${trip.destination}','${trip.description}','${trip.days}','${trip.rating}','${trip.latitude}','${trip.longitude}','${trip.country}','${trip.user_id}')`
   );
@@ -128,7 +134,7 @@ app.put("/api/trips/:id", async (request, response) => {
     response.status(200);
   } catch (error) {
     response.status(409);
-    console.log("Error in update");
+    response.json("Error in update");
   }
 });
 

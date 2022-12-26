@@ -9,29 +9,23 @@ export function containsSpecialChars(str) {
     return specialChars.test(str);
 }
 
-
 export async function validateEmail(email) {
     const emailCheck = await database.raw(`select email from users where email='${email}'`)
     if (emailCheck.length > 0) {
-        console.log("email already exist");
-        return false
+        console.log("Email already exist");
+        return false;
     } else if (email.length < 5 || email.length > 20) {
-        console.log("email must be between 5 and 20 characters");
-        return false
+        console.log("Email must be between 5 and 20 characters");
+        return false;
     } else {
-        return true
+        return true;
     }
 }
-
 
 export function validatePassword(password) {
     if (password.length < 5 || password.length > 20 || !containsNumber(password) || !containsSpecialChars(password)) {
-        return false
+        return false;
     } else {
-        return true
+        return true;
     }
-}
-
-export async function validateCurrentPassword() {
-
 }

@@ -12,24 +12,23 @@ app.use(
 );
 app.use("/", express.static("./public", { extensions: ["html"] }));
 
-//----------------------------------------------------------
-//API routes for user authentication and account creation
+//API routes for account creation and user authentication  
 app.post("/api/sign-up", async (request, response) => {
-  const credentials = request.body
+  const credentials = request.body;
   const email = credentials.email;
-  const password = credentials.password
+  const password = credentials.password;
   console.log(email, password);
   if (validatePassword(password) && await validateEmail(email)) {
-    await database.raw(`insert into users (email, password) values ('${email}','${password}')`)
-    const newAccount = await database.raw(`SELECT * FROM users ORDER BY id DESC LIMIT 1;`)
-    response.status(200)
-    response.json(newAccount)
+    await database.raw(`insert into users (email, password) values ('${email}','${password}')`);
+    const newAccount = await database.raw(`SELECT * FROM users ORDER BY id DESC LIMIT 1;`);
+    response.status(200);
+    response.json(newAccount);
   } else if (!validatePassword(password)) {
-    response.status(401)
-    response.json("Password is invalid")
+    response.status(401);
+    response.json("Password is invalid");
   } else {
-    response.status(401)
-    response.json("email is invalid")
+    response.status(401);
+    response.json("Email is invalid");
   }
 });
 
@@ -49,9 +48,39 @@ app.post("/api/login", async (request, response) => {
   }
 });
 
+//API for updating the credentials
+app.put("/api/update-email", async (request, response) => {
+  const id = Number(request.body.id);
+  const newEmail = request.body.newEmail;
+  if (await validateEmail(newEmail)) {
+    await database.raw(
+      `update users set email = '${newEmail}' where id = ${id};`
+    );
+    response.status(200);
+    response.json("Updated");
+  } else {
+    response.status(409);
+    response.json("Error in update");
+  }
+});
 
+app.put("/api/update-password", async (request, response) => {
+  const { currentPassword, newPassword, id } = request.body;
+  console.log(currentPassword, newPassword, id);
+  if (validatePassword(newPassword)) {
+    await database.raw(
+      `update users set password = '${newPassword}' where id = ${id} AND password='${currentPassword}';`
+    );
+    response.status(200);
+    response.json("Updated");
+  } else {
+    response.status(409);
+    response.json("The new password is not OK!");
+  }
+});
+
+ //API for users trips 
 app.get("/api/trips/:id", async (request, response) => {
-  //gets the trips with selected user_id
   const id = Number(request.params.id);
   const result = await database.raw(
     `select * from trips where user_id = ${id}`
@@ -74,8 +103,8 @@ app.post("/api/trips", async (request, response) => {
   response.json(newTrip);
 });
 
+//API for updating and deleting the selected trip
 app.put("/api/trips/:id", async (request, response) => {
-  //updates the selected trip
   try {
     const id = Number(request.params.id);
     const {
@@ -103,40 +132,6 @@ app.put("/api/trips/:id", async (request, response) => {
   }
 });
 
-app.put("/api/update-email", async (request, response) => {
-  //updates the credentials
-  const id = Number(request.body.id);
-  const newEmail = request.body.newEmail;
-  if (await validateEmail(newEmail)) {
-    await database.raw(
-      `update users set email = '${newEmail}' where id = ${id};`
-    );
-    response.status(200);
-    response.json("Updated")
-  } else {
-    response.status(409);
-    response.json("Error in update");
-  }
-});
-
-
-app.put('/api/update-password', async (request, response) => {
-  const { currentPassword, newPassword, id } = request.body;
-  console.log(currentPassword, newPassword, id);
-  if (validatePassword(newPassword)) {
-    await database.raw(
-      `update users set password = '${newPassword}' where id = ${id} AND password='${currentPassword}';`
-    );
-    response.status(200);
-    response.json("Updated")
-  } else {
-    response.status(409);
-    response.json("The new password is not OK!")
-  }
-});
-
-
-
 app.delete("/api/trips/:id", async (request, response) => {
   const id = Number(request.params.id);
   await database.raw(`delete from trips where id=${id}`);
@@ -146,7 +141,7 @@ app.delete("/api/trips/:id", async (request, response) => {
 
 app.all("/*", async (request, response) => {
   response.status(404);
-  response.json({ error: "This route does not exist" });
+  response.json({ error: "This route does not exist!" });
 });
 
 const port = 4000;

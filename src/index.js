@@ -14,9 +14,8 @@ app.use("/", express.static("./public", { extensions: ["html"] }));
 
 //API routes for account creation and user authentication  
 app.post("/api/sign-up", async (request, response) => {
-  const credentials = request.body;
-  const email = credentials.email;
-  const password = credentials.password;
+  const email = request.body.email;
+  const password = request.body.password;
   if (validatePassword(password) && await validateEmail(email)) {
     await database.raw(`insert into users (email, password) values ('${email}','${password}')`);
     const newAccount = await database.raw(`SELECT * FROM users ORDER BY id DESC LIMIT 1;`);
@@ -32,13 +31,12 @@ app.post("/api/sign-up", async (request, response) => {
 });
 
 app.post("/api/login", async (request, response) => {
-  const credentials = request.body;
-  const email = credentials.email;
-  const password = credentials.password;
+  const email = request.body.email;
+  const password = request.body.password;
   const authentication = await database.raw(
     `select email, id from users where email='${email}' AND password='${password}'`
   );
-  if (authentication.length == 0) {
+  if (authentication.length == 0) {  //no account matches
     response.status(401);
     response.json("Email and password do not match!");
   } else {
@@ -48,7 +46,6 @@ app.post("/api/login", async (request, response) => {
 });
 
 //API for updating and deleting the credentials
-
 app.delete("/api/user/:id", async (request, response) => {
   const id = Number(request.params.id);
   await database.raw(`delete from trips where user_id=${id}`);
@@ -94,7 +91,6 @@ app.get("/api/trips/:id", async (request, response) => {
   );
   response.status(200);
   response.json(result);
-
 });
 
 app.post("/api/trips", async (request, response) => {

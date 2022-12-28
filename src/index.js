@@ -73,7 +73,7 @@ app.put("/api/update-password", async (request, response) => {
   const { currentPassword, newPassword, id } = request.body;
   if (validatePassword(newPassword)) {
     await database.raw(
-      `update users set password = '${newPassword}' where id = ${id} AND password='${currentPassword}';`
+      `update users set password = '${newPassword}' where id = '${id}' IN (select id from users where password='${currentPassword}') ';`
     );
     response.status(200);
     response.json("Updated");

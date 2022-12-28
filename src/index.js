@@ -106,7 +106,7 @@ app.post("/api/trips", async (request, response) => {
 });
 
 //API for updating and deleting the selected trip
-app.put("/api/trips/:id", async (request, response) => {
+app.put("/api/trips/:id/", async (request, response) => {
   try {
     const id = Number(request.params.id);
     const {
@@ -119,8 +119,9 @@ app.put("/api/trips/:id", async (request, response) => {
       longitude,
       country
     } = request.body;
+
     await database.raw(
-      `update trips set date = '${date}', destination = '${destination}', description ='${description}', days ='${days}', rating ='${rating}', latitude ='${latitude}', longitude ='${longitude}', country = ${country} where id = ${id};`
+      `update trips set date = '${date}', destination = '${destination}', description ='${description}', days ='${days}', rating ='${rating}', latitude ='${latitude}', longitude ='${longitude}', country = '${country}' where id = ${id};`
     );
     const updatedTrip = await database.raw(
       `SELECT * FROM trips WHERE id = ${id};`

@@ -7,7 +7,9 @@ This is the backend server of the "My Trip Diary" project
 
 To get the server started, in the project directory, you can run:
 
-### `node .\src\index.js`
+ ```
+ node .\src\index.js
+ ```
 
 ### Prerequisites
 

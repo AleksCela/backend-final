@@ -20,6 +20,6 @@ npm install
 
 ## Authors
 
-Aleks -> AleksCela
+Aleks Cela-> AleksCela
 Fjoralba Zerka -> fjoralba29
-Eleni -> emr-tech
+Eleni Morava -> emr-tech

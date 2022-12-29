@@ -72,11 +72,17 @@ app.put("/api/update-email", async (request, response) => {
 app.put("/api/update-password", async (request, response) => {
   const { currentPassword, newPassword, id } = request.body;
   if (validatePassword(newPassword)) {
-    await database.raw(
-      `update users set password = '${newPassword}' where id = '${id}' IN (select id from users where password='${currentPassword}') ';`
-    );
-    response.status(200);
-    response.json("Updated");
+    const auth = await database.raw(`select * from users where id= '${id}' AND password='${currentPassword}'`)
+    if (auth.length === 0) {
+      response.status(404)
+      response.json("Wrong current password")
+    } else {
+      await database.raw(
+        `update users set password = '${newPassword}' where id = '${id}' AND password='${currentPassword}'`
+      );
+      response.status(200);
+      response.json("Updated");
+    }
   } else {
     response.status(409);
     response.json("The new password is not OK!");
